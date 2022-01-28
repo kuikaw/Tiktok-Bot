@@ -33,12 +33,12 @@ app = Client("JayBee", bot_token=bot_token, api_id=api, api_hash=hash, workers=w
 def start(client, message):
     kb = [[InlineKeyboardButton('Canal🛡', url=chnnl),InlineKeyboardButton('Groupe🔰', url="https://t.me/+yvQ1dnyyCuE3OTI0")]]
     reply_markup = InlineKeyboardMarkup(kb)
-    app.send_message(chat_id=message.from_user.id, text=f"Salut, C'est moi **TikTok Downloader Bot**.\nJe peux télécharger des vidéos TikTok sans limite.\n\n"
-                          "__**Développeur :**__ __@CodingTeam__\n"
-                          "__**Groupe :**__ __Coding Team__\n"
-                          "__**Langue :**__ __🔥Python3__",
-                     parse_mode='md',
-                     reply_markup=reply_markup)
+    app.send_message(
+        chat_id=message.from_user.id,
+        text="Salut, C'est moi **TikTok Downloader Bot**.\nJe peux télécharger des vidéos TikTok sans limite.\n\n__**Développeur :**__ __@CodingTeam__\n__**Groupe :**__ __Coding Team__\n__**Langue :**__ __🔥Python3__",
+        parse_mode='md',
+        reply_markup=reply_markup,
+    )
 
 
 
@@ -47,10 +47,12 @@ def start(client, message):
 def help(client, message):
     kb = [[InlineKeyboardButton('Canal🛡', url=chnnl),InlineKeyboardButton('Groupe🔰', url="https://t.me/+yvQ1dnyyCuE3OTI0")]]
     reply_markup = InlineKeyboardMarkup(kb)
-    app.send_message(chat_id=message.from_user.id, text=f"Salut,Je suis **TikTok Downloader Bot**.\nJe peux télécharger des vidéos Tiktok en me donnant tous simplement le lien.\n\n"
-                                            "__Envoyer moi le lien du vidéo__",
-                     parse_mode='md',
-                     reply_markup=reply_markup)
+    app.send_message(
+        chat_id=message.from_user.id,
+        text='Salut,Je suis **TikTok Downloader Bot**.\nJe peux télécharger des vidéos Tiktok en me donnant tous simplement le lien.\n\n__Envoyer moi le lien du vidéo__',
+        parse_mode='md',
+        reply_markup=reply_markup,
+    )
 
 
 @app.on_message((filters.regex("http://")|filters.regex("https://")) & (filters.regex('tiktok')|filters.regex('douyin')))
@@ -63,7 +65,7 @@ def tiktok_dl(client, message):
 
 
 
-    
+
     params = {
       "link": link
     }
@@ -71,11 +73,11 @@ def tiktok_dl(client, message):
       'x-rapidapi-host': "tiktok-info.p.rapidapi.com",
       'x-rapidapi-key': "f9d65af755msh3c8cac23b52a5eep108a33jsnbf7de971bb72"
     }
-    
+
     ### Get your Free TikTok API from https://rapidapi.com/TerminalWarlord/api/tiktok-info/
     #Using the default one can stop working any moment 
-    
-    api = f"https://tiktok-info.p.rapidapi.com/dl/"
+
+    api = 'https://tiktok-info.p.rapidapi.com/dl/'
     r = requests.get(api, params=params, headers=headers).json()['videoLinks']['download']
     directory = str(round(time.time()))
     filename = str(int(time.time()))+'.mp4'
@@ -93,10 +95,9 @@ def tiktok_dl(client, message):
             show = 1
             for chunk in r.iter_content(chunk_size=chunk_size):
                 f.write(chunk)
-                dl = dl + chunk_size
+                dl += chunk_size
                 percent = round(dl * 100 / size)
-                if percent > 100:
-                    percent = 100
+                percent = min(percent, 100)
                 if show == 1:
                     try:
                         a.edit(f'__**URL :**__ __{message.text}__\n'
@@ -108,19 +109,19 @@ def tiktok_dl(client, message):
                     if percent == 100:
                         show = 0
 
-        a.edit(f'__Telechargement dans le serveur!\n'
-               f'Envoie en cours vers Telegram⏳__')
+        a.edit('__Telechargement dans le serveur!\nEnvoie en cours vers Telegram⏳__')
         start = time.time()
         title = filename
-        app.send_document(chat_id=message.chat.id,
-                          document=f"./{directory}/{filename}",
-                          caption=f"**Fichier :** __{filename}__\n"
-                          f"**Taille :** __{total_size} MB__\n\n"
-                          f"__Télécharger par @{BOT_URL}__",
-                          file_name=f"{directory}",
-                          parse_mode='md',
-                          progress=progress,
-                          progress_args=(a, start, title))
+        app.send_document(
+            chat_id=message.chat.id,
+            document=f'./{directory}/{title}',
+            caption=f'**Fichier :** __{title}__\n**Taille :** __{total_size} MB__\n\n__Télécharger par @{BOT_URL}__',
+            file_name=f"{directory}",
+            parse_mode='md',
+            progress=progress,
+            progress_args=(a, start, title),
+        )
+
         a.delete()
         try:
             shutil.rmtree(directory)
